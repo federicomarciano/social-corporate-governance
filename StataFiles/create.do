@@ -1,5 +1,5 @@
 ********************************************************************************
-* create.do   10\06\2021 *******************************************************
+* create.do   11\10\2021 *******************************************************
 ********************************************************************************
 /*
 
@@ -500,12 +500,13 @@ save CorporateGovernance_HeavyData\TempData\Temp_ISOdata.dta, replace
 
 
 *GREEN ACCOUNTS-----------------------------------------------------------------
-clear 
-import excel CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, firstrow 
-save CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, replace
+
 
 
 *OLD FORMAT
+clear 
+import excel CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, firstrow 
+save CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, replace
 use CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, clear 
 destring year, replace 
 gen num=_n
@@ -638,7 +639,7 @@ clear
 *import raw data on emissions
 import excel CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_RawFormat, firstrow 
 
-*replace according to the USEtox weights
+*replace according to the USEtox weights (DALYs)
 *air
 replace hexachlorcyclohexan_air=hexachlorcyclohexan_air*3.66095266066354e-05
 replace tetrachlorethan_air=tetrachlorethan_air*2.2477960370426403e-06
@@ -682,7 +683,7 @@ replace vinylchlorid_air=vinylchlorid_air*3.7897322084076595e-07
 replace zink_air=zink_air*0.0038082097461898
 
 *water receiver 
-replace hexachlorcyclohexan_water_receiver=hexachlorcyclohexan_water_receiver*1.92105853935005e-05
+replace hexachlorcyclohexan_water_receiv=hexachlorcyclohexan_water_receiv*1.92105853935005e-05
 replace dichlorethan_water_receiver=dichlorethan_water_receiver*9.51389585137521e-07
 replace aldrin_water_receiver=aldrin_water_receiver*8.51824336171736e-05
 replace anthracen_water_receiver=anthracen_water_receiver*8.868065221373709e-06
@@ -796,7 +797,7 @@ replace perfluorcarboner_ghg=perfluorcarboner_ghg*7390
 replace svovlhexafluorid_ghg=svovlhexafluorid_ghg*22800
 
 *generate air
-gen toxicity_nf = hexachlorcyclohexan_air + /*
+gen air = hexachlorcyclohexan_air + /*
 */ tetrachlorethan_air + /*
 */ trichlorethan_air + /*
 */ dichlorethan_air + /*
@@ -837,7 +838,7 @@ gen toxicity_nf = hexachlorcyclohexan_air + /*
 */ vinylchlorid_air + /*
 */ zink_air 
 
-gen water_rec= hexachlorcyclohexan_water_receiver + /*
+gen water_rec= hexachlorcyclohexan_water_receiv + /*
 */ dichlorethan_water_receiver + /*
 */ aldrin_water_receiver + /*
 */ anthracen_water_receiver + /*

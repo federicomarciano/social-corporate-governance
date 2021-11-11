@@ -1916,7 +1916,7 @@ merge 1:1 activity_id case_number enf_conclusion_id using `dollars', nogenerate
 
 
 *create total penalty and number of settlements per year 
-gen penalty = fed_penalty + state_local_penalty_amt
+gen penalty = fed_penalty_assessed + state_local_penalty_amt
 drop if settlement_fy==2022 | settlement_fy==.
 gen pen=1 if penalty!=0 & penalty!=. 
 replace penalty=penalty/1000000
@@ -2061,5 +2061,53 @@ line Thomas Reilly Browner Whitman Leavitt Johnson Jackson McCarthy Pruitt Wheel
 graph export "isptri.png", as(png) name("Graph") replace
 
 
+****Possible Instrument 
+cd .. 
+import excel Data\PossibleInstrument\Norway, firstrow clear 
+drop if year==. 
+rename annual annual_nor 
+rename smoothed smoothed_nor 
+tempfile norway 
+save `norway'
+import excel Data\PossibleInstrument\Sweden, firstrow clear 
+drop if year==. 
+rename annual annual_swe
+rename smoothed smoothed_swe
+merge 1:1 year using `norway', nogenerate 
+tempfile rainfall 
+save `rainfall'
+import excel Data\PossibleInstrument\Utilities, firstrow clear
+destring year, replace 
+tempfile utilities 
+save `utilities'
+import excel Data\PossibleInstrument\Industries, firstrow clear
+rename Nox NOx
+keep year CO2 NOx SO2 PM10 PM25 
+foreach i in CO2 NOx SO2 PM10 PM25 {
+	rename `i' `i'_ind 
+	label variable `i' "`i'"
+}
+tempfile industries
+save `industries'
+import excel Data\PossibleInstrument\Shipping, firstrow clear
+drop if year==""
+keep year CO2 NOx SO2 PM10 PM25 
+merge 1:1 year using `industries', nogenerate
+foreach i in  CO2 NOx SO2 PM10 PM25 {
+	replace `i'= `i'_ind - `i'
+}
+destring year, replace 
+merge 1:1 year using `rainfall', nogenerate
+merge 1:1 year using `utilities'
+rename Nox_UT NOx_UT
+label variable annual_nor "Annual Rainfall in Norway"
+foreach i in  CO2 NOx SO2 PM10 PM25 {
+	gen `i'_perc= `i'_UT/`i'*100
+	line `i'_perc year, xtitle("Year") ytitle("% of emissions of `i'") graphregion(color(white)) bgcolor(white) xlabel(1990(1)2019, angle(90))
+	graph export "`i'.png", as(png) name("Graph") replace
+	label variable `i'_UT "`i' from Utilities"
+	line `i'_UT year, xtitle("Year") graphregion(color(white)) bgcolor(white) xlabel(1990(1)2019, angle(90))|| line annual_nor year,   xtitle("Year") graphregion(color(white)) bgcolor(white)  xlabel(  1990(1)2019, angle(90)) yaxis(2)
+	graph export "`i'_UT.png", as(png) name("Graph") replace
+}
 
 
