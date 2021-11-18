@@ -1,5 +1,5 @@
 ********************************************************************************
-* create.do   11\10\2021 *******************************************************
+* create.do   11\18\2021 *******************************************************
 ********************************************************************************
 /*
 
@@ -838,7 +838,7 @@ gen air = hexachlorcyclohexan_air + /*
 */ vinylchlorid_air + /*
 */ zink_air 
 
-gen water_rec= hexachlorcyclohexan_water_receiv + /*
+gen water_rec= hexachlorcyclohexan_water_receiver + /*
 */ dichlorethan_water_receiver + /*
 */ aldrin_water_receiver + /*
 */ anthracen_water_receiver + /*
@@ -1023,7 +1023,7 @@ merge m:1 cvr_firm year using CorporateGovernance_HeavyData\TempData\Temp_GreenA
 *THIS IS THE THRESHOLD: 
 ********************************************************************************
 *I drop those companies which have less than 10 employees or missing employees every year; 
-*I don't drop companies if they are in the gree accounts 
+*I don't drop companies if they are in the green accounts 
 *Afterwards also the companies for which we never have a total voting share 
 *which is equal to one will be dropped. 
 ******************************************************************************** 
