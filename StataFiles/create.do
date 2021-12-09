@@ -1,5 +1,5 @@
 ********************************************************************************
-* create.do   11\18\2021 *******************************************************
+* create.do   12\07\2021 *******************************************************
 ********************************************************************************
 /*
 
@@ -15,6 +15,11 @@ Legend:
 
 WARNING: to run this code, you should set as current directory a folder containing
 both CorporateGovernance_HeavyData and CorporateGoverance_Main
+
+UPDATE: I changed te Green Accounts section; to aggregate emissions I only refer 
+to DALYs and to the version of the EPA database restyled in October 2021. The previous 
+version of the do file, which also considered the US EPA toxicity weights and the old 
+format of the database is stored on my GitHub, 11\18\2021 commitment. 
 */
 
 
@@ -500,140 +505,6 @@ save CorporateGovernance_HeavyData\TempData\Temp_ISOdata.dta, replace
 
 
 *GREEN ACCOUNTS-----------------------------------------------------------------
-
-
-
-*OLD FORMAT
-clear 
-import excel CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, firstrow 
-save CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, replace
-use CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010, clear 
-destring year, replace 
-gen num=_n
-/*find observations for which the cvr is missing and see if it is possible 
-to get it by hand */ 
-sort cvr_firm
-replace cvr_firm="71271919" if company_name=="Dallerupgård A/S" & year==2007
-replace cvr_firm="28036493" if company_name=="Simon Salling Syrik" & year==2007
-replace cvr_firm="12298641" if company_name=="Bent Jensen" & year==2007
-replace cvr_firm="55133018" if company_name=="Århus KOM.VÆRKER" & year==2004
-replace cvr_firm="74249515" if company_name=="Asger Pedersen" & year==2007
-replace cvr_firm="30174968" if company_name=="Varmecentral, Sanderum" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Dalum" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Vollsmose" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Sydøst" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Billedskærervej" & year==2004
-replace cvr_firm="29189854" if company_name=="Sdr. Hostrup Losseplads" & year==2004
-replace cvr_firm="47872812" if company_name=="Østergård Hovedgårdv/Tommy Hensberg" & year==2007
-replace cvr_firm="34208115" if company_name=="Amager Ressource Center alias I/S AMAGERFORBRÆNDINGEN" & year==2017
-replace cvr_firm="34208115" if company_name=="Amager Ressource Center alias I/S AMAGERFORBRÆNDINGEN" & year==2018
-replace cvr_firm="19232344" if company_name=="Gitte Lerche-Simonsen Aps" & year==2007
-replace cvr_firm="28434456" if company_name=="Morten Kuhr" & year==2007
-replace cvr_firm="16840378" if company_name=="Mogens Sørensen" & year==2007
-replace cvr_firm="19046141" if company_name=="Kjølbygaardv/Mads & Jens Henrik  Thøgersen" & year==2007
-replace cvr_firm="14768343" if company_name=="I/S Revas" & year==2007
-replace cvr_firm="69857817" if company_name=="Poul Sloth" & year==2007
-replace cvr_firm="55133018" if company_name=="Århusværket" & year==2004
-replace cvr_firm="11517838" if company_name=="Gabøl Nørregaardv/Poul Marquard Mathiasen" & year==2007
-replace cvr_firm="11254217" if company_name=="Landbrug" & year==2001 & num==3025
-replace cvr_firm="72476115" if company_name=="Landbrug" & year==2001 & num==3045
-replace cvr_firm="84718068" if company_name=="Asmus Johannsen Damm" & year==2007
-replace cvr_firm="92746151" if company_name=="Maskinstation ogLandbrug/Asbjørn Holst Nielsen" & year==2007
-replace cvr_firm="21506435" if company_name=="Jens Hovalt Bertelsen" & year==2004
-replace cvr_firm="44305011" if company_name=="Grenå Forbrændingsanlæg" & year==2004
-replace cvr_firm="27401724" if company_name=="Kolding Affaldskraftvarmeværk" & year==2001
-replace cvr_firm="12059434" if company_name=="BedstedgårdV/Bent Eriksson" & year==2007
-replace cvr_firm="25935977" if company_name=="Ravnholt v/Anders Heckmann Høy" & year==2007
-replace cvr_firm="14018387" if company_name=="GårdejerJens Otto Ladefoged" & year==2007
-replace cvr_firm="11423418" if company_name=="BHJ A/S Protien Food" & year==2004
-replace cvr_firm="17137999" if company_name=="Mourits Rahbek" & year==2007
-replace cvr_firm="79456314" if company_name=="Lars Bojsen" & year==2007
-replace cvr_firm="24202879" if company_name=="Aarhusegnens Andel AMBA" & year==2007
-replace cvr_firm="25495942" if company_name=="Haderslev Kraftvarmeværk A/S" & year==2004
-replace cvr_firm="29734097" if company_name=="Karsten Thier Larsen" & year==2007
-replace cvr_firm="20445084" if company_name=="Fredsholm Multisite K/S" & year==2007
-replace cvr_firm="20247797" if company_name=="Skanska Asfalt I/S" & year==2007
-replace cvr_firm="26390370" if company_name=="Stenager mark  I/S" & year==2007
-replace cvr_firm="55133018" if company_name=="Århus KOMMUNALE VÆRKER" & year==2004
-replace cvr_firm="16406899" if company_name=="NYCOMED Danmark A/S" & year==2007
-
-
-
-replace cvr_firm = subinstr(cvr_firm, " ", "",. )
-replace cvr_firm = subinstr(cvr_firm, "  ", "",. )
-gen leng=length(cvr_firm)
-drop if leng==1
-replace cvr_firm=substr(cvr_firm,1,8)
-bysort cvr_firm year (p_number): gen n_plants=_N 
-drop p_number 
-gen toxicity = air + water_rec + water_sew 
-collapse (sum) toxicity GHGs, by(cvr_firm year n_plants)
-save CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts.dta, replace 
-
-import excel CorporateGovernance_Main/Data/GreenAccounts/GreenAccountsWater, firstrow clear 
-destring year, replace 
-gen num=_n
-/*find observations for which the cvr is missing and see if it is possible 
-to get it by hand */ 
-sort cvr_firm
-replace cvr_firm="71271919" if company_name=="Dallerupgård A/S" & year==2007
-replace cvr_firm="28036493" if company_name=="Simon Salling Syrik" & year==2007
-replace cvr_firm="12298641" if company_name=="Bent Jensen" & year==2007
-replace cvr_firm="55133018" if company_name=="Århus KOM.VÆRKER" & year==2004
-replace cvr_firm="74249515" if company_name=="Asger Pedersen" & year==2007
-replace cvr_firm="30174968" if company_name=="Varmecentral, Sanderum" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Dalum" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Vollsmose" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Sydøst" & year==2004
-replace cvr_firm="30174968" if company_name=="Varmecentral, Billedskærervej" & year==2004
-replace cvr_firm="29189854" if company_name=="Sdr. Hostrup Losseplads" & year==2004
-replace cvr_firm="47872812" if company_name=="Østergård Hovedgårdv/Tommy Hensberg" & year==2007
-replace cvr_firm="34208115" if company_name=="Amager Ressource Center alias I/S AMAGERFORBRÆNDINGEN" & year==2017
-replace cvr_firm="34208115" if company_name=="Amager Ressource Center alias I/S AMAGERFORBRÆNDINGEN" & year==2018
-replace cvr_firm="19232344" if company_name=="Gitte Lerche-Simonsen Aps" & year==2007
-replace cvr_firm="28434456" if company_name=="Morten Kuhr" & year==2007
-replace cvr_firm="16840378" if company_name=="Mogens Sørensen" & year==2007
-replace cvr_firm="19046141" if company_name=="Kjølbygaardv/Mads & Jens Henrik  Thøgersen" & year==2007
-replace cvr_firm="14768343" if company_name=="I/S Revas" & year==2007
-replace cvr_firm="69857817" if company_name=="Poul Sloth" & year==2007
-replace cvr_firm="55133018" if company_name=="Århusværket" & year==2004
-replace cvr_firm="11517838" if company_name=="Gabøl Nørregaardv/Poul Marquard Mathiasen" & year==2007
-replace cvr_firm="11254217" if company_name=="Landbrug" & year==2001 & num==3025
-replace cvr_firm="72476115" if company_name=="Landbrug" & year==2001 & num==3045
-replace cvr_firm="84718068" if company_name=="Asmus Johannsen Damm" & year==2007
-replace cvr_firm="92746151" if company_name=="Maskinstation ogLandbrug/Asbjørn Holst Nielsen" & year==2007
-replace cvr_firm="21506435" if company_name=="Jens Hovalt Bertelsen" & year==2004
-replace cvr_firm="44305011" if company_name=="Grenå Forbrændingsanlæg" & year==2004
-replace cvr_firm="27401724" if company_name=="Kolding Affaldskraftvarmeværk" & year==2001
-replace cvr_firm="12059434" if company_name=="BedstedgårdV/Bent Eriksson" & year==2007
-replace cvr_firm="25935977" if company_name=="Ravnholt v/Anders Heckmann Høy" & year==2007
-replace cvr_firm="14018387" if company_name=="GårdejerJens Otto Ladefoged" & year==2007
-replace cvr_firm="11423418" if company_name=="BHJ A/S Protien Food" & year==2004
-replace cvr_firm="17137999" if company_name=="Mourits Rahbek" & year==2007
-replace cvr_firm="79456314" if company_name=="Lars Bojsen" & year==2007
-replace cvr_firm="24202879" if company_name=="Aarhusegnens Andel AMBA" & year==2007
-replace cvr_firm="25495942" if company_name=="Haderslev Kraftvarmeværk A/S" & year==2004
-replace cvr_firm="29734097" if company_name=="Karsten Thier Larsen" & year==2007
-replace cvr_firm="20445084" if company_name=="Fredsholm Multisite K/S" & year==2007
-replace cvr_firm="20247797" if company_name=="Skanska Asfalt I/S" & year==2007
-replace cvr_firm="26390370" if company_name=="Stenager mark  I/S" & year==2007
-replace cvr_firm="55133018" if company_name=="Århus KOMMUNALE VÆRKER" & year==2004
-replace cvr_firm="16406899" if company_name=="NYCOMED Danmark A/S" & year==2007
-replace cvr_firm = subinstr(cvr_firm, " ", "",. )
-replace cvr_firm = subinstr(cvr_firm, "  ", "",. )
-gen leng=length(cvr_firm)
-drop if leng==1
-replace cvr_firm=substr(cvr_firm,1,8)
-bysort cvr_firm year (p_number): gen n_plants=_N 
-drop p_number 
-collapse (sum)  water, by(cvr_firm year n_plants)
-merge 1:1 cvr_firm year using  CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts.dta, nogenerate 
-gen toxicity_water=toxicity + water 
-save CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts.dta, replace 
-
-
-
-*NEW FORMAT  (with raw data on emissions)
 clear 
 
 *import raw data on emissions
@@ -949,12 +820,12 @@ gen GHGs=carbon_ghg + /*
 */ perfluorcarboner_ghg + /*
 */ svovlhexafluorid_ghg 
 
-save CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_NewFormat, replace
-/* this is for the data which are already aggregated
-import excel CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_NewFormat, firstrow 
-save CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_NewFormat, replace
+save CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_DALYs, replace
+/* this is for the data which are already aggregated in terms of emissions
+import excel CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_DALYs, firstrow 
+save CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_DALYs, replace
 */
-use CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_NewFormat, clear 
+use CorporateGovernance_Main/Data/GreenAccounts/GreenAccounts2010_DALYs, clear 
 destring year, replace 
 gen num=_n
 replace cvr_firm="28025319" if company_name=="Kim Puge Kjær Knudsen" 
@@ -994,10 +865,9 @@ replace cvr_firm="26390370" if company_name=="Stenager mark  I/S" & year==2007
 replace cvr_firm="30174968" if company_name=="Varmecentral, Bellinge" & year==2007
 bysort cvr_firm year (p_number): gen n_plants_nf=_N 
 drop p_number 
-gen toxicity_nf = air + water_rec + water_sew 
-rename GHGs GHGs_nf
-collapse (sum) toxicity_nf GHGs_nf, by(cvr_firm year n_plants_nf)
-save CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts_NewFormat.dta, replace 
+gen toxicity = air + water_rec + water_sew 
+collapse (sum) toxicity GHGs, by(cvr_firm year n_plants)
+save CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts_DALYs.dta, replace 
 
 *MERGE**************************************************************************
 use CorporateGovernance_HeavyData\TempData\Temp_Ownership_1, clear 
@@ -1017,7 +887,7 @@ merge m:1 cvr_firm year using CorporateGovernance_HeavyData\TempData\Temp_Accoun
 */ equity_tot liquidity long_debt_tot liabilities_tot staff_cost net_income capital_stock) keep(3) nogenerate 
 
 
-merge m:1 cvr_firm year using CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts, keep(match master) nogenerate 
+merge m:1 cvr_firm year using CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts_DALYs, keep(match master) nogenerate 
 
 
 *THIS IS THE THRESHOLD: 
@@ -1518,9 +1388,6 @@ order nat_ultimate_owned gov_ultimate_owned priv_ultimate_owned listed_ultimate_
 */cum_rd_corr gross_turnover KLratio_corr TobinQ_corr slack_corr leverage_corr return_K_corr assets_tot_corr/*
 */ toxicity GHGs, last 
 
-
-*merging with the new format of green accounts
-merge 1:1 cvr_firm year using  CorporateGovernance_HeavyData\TempData\Temp_GreenAccounts_NewFormat.dta, keep(match master) nogenerate
 
 
 *SAVE***************************************************************************
